@@ -10,11 +10,16 @@ const syncUserData = inngest.createFunction(
     triggers: [{event: "clerk/user.created"}],},
     async ({event})=> {
         const {id, first_name, last_name, email_addresses, image_url} = event.data
+        const email = email_addresses?.[0]?.email_address;
+        if (!email){
+            console.error("No email address found for user with id:", id);
+            return;
+        }
         const userData = {
             _id: id,
-            email: email_addresses[0].email_address,
-            name: first_name + " " + last_name,
-            image: image_url
+            email,
+            name: [first_name, last_name].filter(Boolean).join(" ")|| "Unknown",
+            image: image_url || ""
         }
         await User.create(userData)
     }
@@ -26,7 +31,7 @@ const deleteUserData = inngest.createFunction(
     triggers: [{event: "clerk/user.deleted"}],},
     async ({event})=> {
         const {id} = event.data
-        await User.findByIdAndDelete({_id: id})
+        await User.findByIdAndDelete({id})
     }
 )
 
@@ -36,11 +41,16 @@ const updateUserData = inngest.createFunction(
         triggers: [{event: "clerk/user.updated"}],},
         async ({event})=> {
             const {id, first_name, last_name, email_addresses, image_url} = event.data
+            const email = email_addresses?.[0]?.email_address;
+            if (!email){
+                console.error("No email address found for user with id:", id);
+                return;
+            }
             const userData = {
                 _id: id,
-                email: email_addresses[0].email_address,
-                name: first_name + " " + last_name,
-                image: image_url
+                email,
+                name: [first_name, last_name].filter(Boolean).join(" ")|| "Unknown",
+                image: image_url || ""
             }
             await User.findByIdAndUpdate( id, userData )
             }
