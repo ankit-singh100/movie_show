@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 import { serve } from "inngest/express";
 import {inngest, functions} from "./inngest/index.js";
 import {clerkMiddleware} from "@clerk/express";
+import showRouter from './routes/show_routes.js';
 
 const app = express();
 const PORT = 3000;
@@ -22,6 +23,8 @@ app.get("/", (req,res) => {
 })
 
 app.use("/api/inngest", serve({client: inngest, functions}))
+app.use("/api/show", showRouter)
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
